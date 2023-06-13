@@ -12,6 +12,9 @@ db.once("open", () => console.log("Connected to database."));
 
 app.use(express.json());
 
+const lecturerRouter = require("./routes/lecturer");
+app.use("/lecturer", lecturerRouter);
+
 app.listen(port, () => {
   console.log(`Server is running on ${port}`);
 });
