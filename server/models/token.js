@@ -6,7 +6,6 @@ const tokenSchema = new mongoose.Schema({
   },
   dateTime: {
     type: Date,
-    default: Date.now,
   },
 });
 

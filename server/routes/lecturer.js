@@ -40,9 +40,13 @@ router.post("/", async (req, res) => {
 
 //add token
 router.patch("/:id", getClass, async (req, res) => {
+  let currentDate = new Date();
+  let milSecs = currentDate.getTime();
+  let addMilSecs = 60 * 60 * 1000;
+  let newDate = new Date(milSecs + addMilSecs);
   const newToken = new Token({
     code: randomNumInRange(1000, 9999),
-    dateTime: Date.now(),
+    dateTime: newDate,
   });
   try {
     res.searchClass.tokens.push(newToken);
