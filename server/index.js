@@ -15,6 +15,9 @@ app.use(express.json());
 const lecturerRouter = require("./routes/lecturer");
 app.use("/lecturer", lecturerRouter);
 
+const studentRouter = require("./routes/student");
+app.use("/student", studentRouter);
+
 app.listen(port, () => {
   console.log(`Server is running on ${port}`);
 });
