@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const Token = require("./token");
 
 const classSchema = new mongoose.Schema({
   module: {
@@ -10,18 +11,15 @@ const classSchema = new mongoose.Schema({
     required: true,
     default: Date.now,
   },
-  tokens: {
-    type: String,
-    required: false,
-  },
+  tokens: [Token.schema],
   studentsAbsent: {
-    type: String,
+    type: [String],
     required: true,
   },
   studentsPresent: {
-    type: String,
+    type: [String],
     required: false,
   },
 });
 
-builtinModules.export = mongoose.model("class", classSchema);
+module.exports = mongoose.model("Class", classSchema);
