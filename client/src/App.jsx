@@ -86,7 +86,9 @@ export default function App() {
   return (
     <>
       <div>
-        <button onClick={toggleDahsboard}>Toggle dashboard</button>
+        <button onClick={toggleDahsboard}>
+          Show {showLecturerDash ? "student" : "lecturer"} bashboard.
+        </button>
         {showLecturerDash ? (
           <div className="lecturerDiv">
             {getLoading && <div>Loading...</div>}
@@ -131,7 +133,7 @@ export default function App() {
             </div>
           </div>
         ) : (
-          <div>Div Two</div>
+          <div>Student Div</div>
         )}
       </div>
     </>
