@@ -68,6 +68,7 @@ export default function App() {
       if (!response.ok) {
         throw new Error("Failed to update data");
       }
+      fetchData();
     } catch (error) {
       setError(error.message);
     } finally {
