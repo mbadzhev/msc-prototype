@@ -102,8 +102,22 @@ export default function App() {
                     {item.module}
                     <li>Date: {item.date}</li>
                     <li>ID: {item._id}</li>
-                    <li>Absent: {item.studentsAbsent}</li>
-                    <li>Present: {item.studentsPresent}</li>
+                    {item.studentsAbsent &&
+                      item.studentsAbsent.map((student) => (
+                        <div key={student._id}>
+                          Absent Students:
+                          <li>Name: {student.name}</li>
+                          <li>Student Number: {student.number}</li>
+                        </div>
+                      ))}
+                    {item.studentsPresent &&
+                      item.studentsPresent.map((student) => (
+                        <div key={student._id}>
+                          Present Students:
+                          <li>Name: {student.name}</li>
+                          <li>Student Number: {student.number}</li>
+                        </div>
+                      ))}
                     {item.tokens &&
                       item.tokens.map((token) => (
                         <div key={token._id}>

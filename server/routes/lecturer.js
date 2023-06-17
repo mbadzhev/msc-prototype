@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const Class = require("../models/class");
 const Token = require("../models/token");
+const Student = require("../models/student");
 const { error } = require("console");
 
 //get all classes
@@ -26,10 +27,14 @@ router.get("/:id", async (req, res) => {
 
 //create class
 router.post("/", async (req, res) => {
+  const newStudent = new Student({
+    number: 18600219,
+    name: "StudentName1",
+  });
   const tempClass = new Class({
     module: req.body.module,
-    studentsAbsent: req.body.studentsAbsent,
   });
+  tempClass.studentsAbsent.push(newStudent);
   try {
     const newClass = await tempClass.save();
     res.status(201).json(newClass);
@@ -59,19 +64,30 @@ router.patch("/:id", getClass, async (req, res) => {
 
 //swap student attendance
 router.patch("/:id/:studentId", getClass, async (req, res) => {
-  const index1 = res.searchClass.studentsPresent.findIndex(
-    (element) => (element = req.params.studentId)
+  const studentNumber = req.params.studentId;
+  const objectIndex1 = res.searchClass.studentsAbsent.findIndex(
+    (item) => item && item.number.toString() === studentNumber
   );
-  if (index1 == -1) {
-    const index2 = res.searchClass.studentsAbsent.findIndex(
-      (element) => (element = req.params.studentId)
+  const objectIndex2 = res.searchClass.studentsPresent.findIndex(
+    (item) => item && item.number.toString() === studentNumber
+  );
+
+  if (objectIndex1 !== -1) {
+    const [removedObject] = res.searchClass.studentsAbsent.splice(
+      objectIndex1,
+      1
     );
-    res.searchClass.studentsAbsent.splice(index2, 1);
-    res.searchClass.studentsPresent.push(req.params.studentId);
+    res.searchClass.studentsPresent.push(removedObject);
+  } else if (objectIndex2 !== -1) {
+    const [removedObject] = res.searchClass.studentsPresent.splice(
+      objectIndex2,
+      1
+    );
+    res.searchClass.studentsAbsent.push(removedObject);
   } else {
-    res.searchClass.studentsPresent.splice(index1, 1);
-    res.searchClass.studentsAbsent.push(req.params.studentId);
+    return res.status(400).json({ message: "Object not found in any array." });
   }
+
   try {
     const docUpdate = await res.searchClass.save();
     res.json(docUpdate);
