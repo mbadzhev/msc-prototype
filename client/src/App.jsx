@@ -9,7 +9,12 @@ export default function App() {
   const [patchLoading, setPatchLoading] = useState(false);
   const [itemIdInput, setItemIdInput] = useState("");
 
+  const [dataStudent, setDataStudent] = useState(null);
+  const [codeStudent, setCodeStudent] = useState("");
+  const numberStudent = 18600219;
+
   const apiUri = "http://localhost:5000/lecturer/";
+  const apiUriStudent = "http://localhost:5000/student/";
 
   async function fetchData() {
     try {
@@ -25,6 +30,25 @@ export default function App() {
     } catch (err) {
       setError(err.message);
       setData(null);
+    } finally {
+      setGetLoading(false);
+    }
+  }
+
+  async function fetchStudentData() {
+    try {
+      const response = await fetch(apiUriStudent);
+      if (!response.ok) {
+        throw new Error(
+          `This is an HTTP error: The status is ${response.status}`
+        );
+      }
+      const responseData = await response.json();
+      setDataStudent(responseData);
+      setError(null);
+    } catch (err) {
+      setError(err.message);
+      setDataStudent(null);
     } finally {
       setGetLoading(false);
     }
@@ -76,8 +100,35 @@ export default function App() {
     }
   };
 
+  const markStudentAttendance = async (classId, number, code) => {
+    setPatchLoading(true);
+
+    try {
+      const response = await fetch(
+        `${apiUriStudent}/${classId}/${number}/${code}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to update data");
+      }
+      fetchStudentData();
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setPatchLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchData();
+    fetchStudentData();
   }, []);
 
   const toggleDahsboard = () => {
@@ -148,7 +199,61 @@ export default function App() {
             </div>
           </div>
         ) : (
-          <div>Student Div</div>
+          <div className="studentDiv">
+            {getLoading && <div>Loading...</div>}
+            {error && (
+              <div>{`There is a problem fetching the requested data - ${error}`}</div>
+            )}
+            <div className="event">
+              {dataStudent &&
+                dataStudent.map((item) => (
+                  <ul key={item._id}>
+                    {item.module}
+                    <li>Date: {item.date}</li>
+                    <li>ID: {item._id}</li>
+                    {item.studentsAbsent &&
+                      item.studentsAbsent.map(
+                        (student) =>
+                          student.number === numberStudent && (
+                            <div key={student._id}>
+                              <li>Name: {student.name}</li>
+                              <li>Student Number: {student.number}</li>
+                              <li>Status: Absent</li>
+                            </div>
+                          )
+                      )}
+                    {item.studentsPresent &&
+                      item.studentsPresent.map(
+                        (student) =>
+                          student.number === numberStudent && (
+                            <div key={student._id}>
+                              <li>Name: {student.name}</li>
+                              <li>Student Number: {student.number}</li>
+                              <li>Status: Present</li>
+                            </div>
+                          )
+                      )}
+                    <input
+                      type="text"
+                      value={codeStudent}
+                      onChange={(e) => setCodeStudent(e.target.value)}
+                    />
+                    <button
+                      onClick={() =>
+                        markStudentAttendance(
+                          item._id,
+                          numberStudent,
+                          codeStudent
+                        )
+                      }
+                      disabled={patchLoading}
+                    >
+                      {patchLoading ? "Loading..." : "Mark as present"}
+                    </button>
+                  </ul>
+                ))}
+            </div>
+          </div>
         )}
       </div>
     </>
