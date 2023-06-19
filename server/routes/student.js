@@ -24,37 +24,43 @@ router.get("/:id", async (req, res) => {
 });
 
 //update attendance
-router.patch("/:classId/:studentId/:code", getClass, async (req, res) => {
-  const index1 = res.searchClass.studentsPresent.findIndex(
-    (element) => (element = req.params.studentId)
+router.patch("/:classId/:studentNumber/:code", getClass, async (req, res) => {
+  const studentNumber = req.params.studentNumber;
+  const tokenCode = req.params.code;
+  const objectIndex1 = res.searchClass.studentsAbsent.findIndex(
+    (item) => item && item.number.toString() === studentNumber
   );
-  //if already checked in
-  if (index1 != -1) {
+  const objectIndex2 = res.searchClass.studentsPresent.findIndex(
+    (item) => item && item.number.toString() === studentNumber
+  );
+  if (objectIndex2 !== -1) {
     return res.status(400).json({ message: "Already checked in." });
   }
-  let codeCorrect = false;
-  for (const element of res.searchClass.tokens) {
-    let tempTocken = element;
-    if (
-      tempTocken.code == req.params.code &&
-      tempTocken.dateTime >= new Date()
-    ) {
-      codeCorrect = true;
-      const index2 = res.searchClass.studentsAbsent.findIndex(
-        (element) => (element = req.params.studentId)
-      );
-      res.searchClass.studentsAbsent.splice(index2, 1);
-      res.searchClass.studentsPresent.push(req.params.studentId);
+  if (objectIndex1 !== -1) {
+    let codeCorrect = false;
+    for (const element of res.searchClass.tokens) {
+      let tempTocken = element;
+      if (tempTocken.code == tokenCode && tempTocken.dateTime >= new Date()) {
+        codeCorrect = true;
+        const [removedObject] = res.searchClass.studentsAbsent.splice(
+          objectIndex1,
+          1
+        );
+        res.searchClass.studentsPresent.push(removedObject);
+      }
     }
+    if (codeCorrect == false) {
+      return res.status(400).json({ message: "Code invalid." });
+    }
+  } else {
+    return res.status(400).json({ message: "Student not found in any class." });
   }
-  if (codeCorrect == false) {
-    return res.status(400).json({ message: "Code invalid." });
-  }
+
   try {
     const docUpdate = await res.searchClass.save();
-    return res.json(docUpdate);
+    res.json(docUpdate);
   } catch (error) {
-    return res.status(400).json({ message: error.message });
+    res.status(400).json({ message: error.message });
   }
 });
 
